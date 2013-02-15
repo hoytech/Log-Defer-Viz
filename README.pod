@@ -30,6 +30,7 @@ log-defer-viz - command-line utility for rendering log messages created by L<Log
     $ log-defer-viz file --nologs  ## don't show log section
 
 =head1 TIMERS
+
     $ log-defer-viz file --timer-columns 80  ## width of timer chart
     $ log-defer-viz file --since-now  ## show relative to now times
                                       ##   like "34 minutes ago"
@@ -42,8 +43,6 @@ log-defer-viz - command-line utility for rendering log messages created by L<Log
     $ log-defer-viz file --data-format=json  ## not pretty
     $ log-defer-viz file --data-format=dumper  ## Data::Dumper
     $ log-defer-viz file --data-only  ## only show data
-
-=head1 DESCRIPTION
 
 =head1 SEE ALSO
 

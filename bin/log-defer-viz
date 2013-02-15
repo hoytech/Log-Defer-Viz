@@ -1,0 +1,164 @@
+#!/usr/bin/env perl
+
+use common::sense;;
+
+use Data::Dumper;
+use JSON::XS;
+use Date::Format;
+use Getopt::Long;
+
+use Log::Defer::Viz;
+
+
+
+my $columns = 100;
+
+if (eval { require Term::Size; }) {
+  my ($term_cols, $term_rows) = Term::Size::chars(*STDOUT{IO});
+  $columns = $term_cols if $term_cols;
+}
+
+
+
+my $opt = {};
+
+GetOptions($opt,
+           ## INPUT FORMAT
+ 
+           'input-format=s',
+
+           ## FILTERING
+
+           'logs',
+
+           'error',
+           'warn',
+           'info',
+           'debug',
+
+           'quiet',
+           'verbose|v',
+           'verbosity=i',
+
+           ## TIMERS
+
+           'timers',
+
+           'timer-columns=i',
+           'since-now',
+           'timer-logs',
+
+           ## DATA SECTION
+
+           'data',
+
+           'data-format=s',
+           'data-only',
+
+) || die "GetOptions failed";
+
+
+
+while(<>) {
+  my $entry = decode_json($_);
+
+  print "--- " . time2str("%Y-%m-%d %I:%M:%S", $entry->{start}) . " ---\n";
+
+  foreach my $log (@{ $entry->{logs} }) {
+    print '  | ' . format_time_offset($log->[0]) . ' [' . num_to_level($log->[1]) . '] ' . $log->[2] . "\n";
+  }
+
+  print "  |_" . format_time_offset($entry->{end}) . " [END]\n";
+  
+  print "\n" . Log::Defer::Viz::render_timers(width => $columns-10, timers => $entry->{timers}) if $entry->{timers};
+
+  print "\n";
+}
+
+
+
+sub num_to_level {
+  my $level = shift;
+
+  return "ERROR" if $level == 10;
+  return "WARN" if $level == 20;
+  return "INFO" if $level == 30;
+  return "DEBUG" if $level == 40;
+
+  return $level;
+}
+
+sub format_time_offset {
+  my $offset = shift;
+
+  return sprintf("%.6f", $offset);
+}
+
+
+
+
+
+=pod
+
+=head1 NAME
+
+log-defer-viz - command-line utility for rendering log messages created by L<Log::Defer>
+
+=head1 INPUT METHODS
+
+    $ cat file.log | log-defer-viz
+    $ log-defer-viz < file.log
+    $ log-defer-viz file.log
+    $ log-defer-viz file.log file2
+    $ log-defer-viz file.log.gz file2 file3.bz2
+
+=head1 INPUT FORMAT
+
+    $ log-defer-viz file --input-format=json  ## default is newline separated JSON
+    $ log-defer-viz file --input-format=sereal  ## Sereal::Decoder
+    $ log-defer-viz file --input-format=messagepack  ## Data::MessagePack
+    $ log-defer-viz file --input-format=storable  ## Storable
+
+=head1 FILTERING
+
+    $ log-defer-viz file  ## by default shows error, warn, and info logs
+    $ log-defer-viz file -v  ## verbose mode (shows debug logs)
+    $ log-defer-viz file --debug  ## same: show debug logs
+    $ log-defer-viz file --quiet  ## only show errors
+    $ log-defer-viz file --verbosity 25  ## numeric verbosity threshold
+    $ log-defer-viz file --nowarn  ## muffle warn logs (so show error and info)
+    $ log-defer-viz file --nologs  ## don't show log section
+
+=head1 TIMERS
+    $ log-defer-viz file --timer-columns 80  ## width of timer chart
+    $ log-defer-viz file --since-now  ## show relative to now times
+                                      ##   like "34 minutes ago"
+    $ log-defer-viz file --notimer-logs  ## don't show log times on chart
+    $ log-defer-viz file --notimers  ## don't show timer chart
+
+=head1 DATA SECTION
+
+    $ log-defer-viz file --data  ## show data section. default: pretty JSON
+    $ log-defer-viz file --data-format=json  ## not pretty
+    $ log-defer-viz file --data-format=dumper  ## Data::Dumper
+    $ log-defer-viz file --data-only  ## only show data
+
+=head1 DESCRIPTION
+
+=head1 SEE ALSO
+
+L<Log::Defer::Viz github repo|https://github.com/hoytech/Log-Defer-Viz>
+
+L<Log::Defer github repo|https://github.com/hoytech/Log-Defer>
+
+=head1 AUTHOR
+
+Doug Hoyte, C<< <doug@hcsw.org> >>
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2013 Doug Hoyte.
+
+This module is licensed under the same terms as perl itself.
+
+=cut

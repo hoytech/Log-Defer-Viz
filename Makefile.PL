@@ -17,7 +17,7 @@ my %args = (
     DEFINE            => '',
     LICENSE => 'perl',
     dist => {
-      PREOP => 'perldoc -uT lib/Log/Defer/Viz.pm > README.pod; pod2text README.pod > $(DISTVNAME)/README',
+      PREOP => 'perldoc -uT bin/log-defer-viz > README.pod; pod2text README.pod > $(DISTVNAME)/README',
     },
 );
 

@@ -1,0 +1,9 @@
+bin/log-defer-viz
+Changes
+lib/Log/Defer/Viz.pm
+Makefile.PL
+MANIFEST
+MANIFEST.SKIP
+t/runs.t
+t/tp.log
+t/viz.t

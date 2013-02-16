@@ -33,8 +33,7 @@ my @opt_spec = (
   'quiet|q',
   'verbose|v',
 
-  'colour!',
-  'color!', ## alias
+  'colour!', 'color!',
 
   ## TIMERS
 
@@ -53,28 +52,21 @@ my @opt_spec = (
   'grep|g=s',
 );
 
-
 my $opt = {
     'input-format' => 'json',
 
-    date => 1,
+    'date' => 1,
     'since-now' => 0,
 
-    logs => 1,
-    verbosity => 30,
-    error => undef,
-    warn => undef,
-    info => undef,
-    debug => undef,
-    quiet => 0,
-    verbose => 0,
-    colour => 1,
-    color => undef, ## alias
+    'logs' => 1,
+    'verbosity' => 30,
+    'quiet' => 0,
+    'verbose' => 0,
+    'colour' => 1,
 
-    timers => 1,
+    'timers' => 1,
     'timer-columns' => 100,
 
-    'data' => undef,
     'data-format' => 'json-pretty',
     'data-only' => 0,
 };
@@ -308,8 +300,8 @@ log-defer-viz - command-line utility for rendering log messages created by L<Log
     $ cat file.log | log-defer-viz
     $ log-defer-viz < file.log
     $ log-defer-viz file.log
-    $ log-defer-viz file.log file2
-    $ log-defer-viz file.log.gz file2 file3.bz2
+    $ log-defer-viz file.log file2.log
+    $ log-defer-viz archived.log.gz more_logs.bz2
 
 =head1 INPUT FORMAT
 
@@ -325,7 +317,7 @@ Note: The only input format currently implemented is newline-separated JSON.
     $ log-defer-viz file  ## by default shows error, warn, and info logs
     $ log-defer-viz file -v  ## verbose mode (adds debug logs and more)
     $ log-defer-viz file --debug  ## show debug logs
-    $ log-defer-viz file --quiet  ## only show errors and warnings
+    $ log-defer-viz file --quiet  ## only errors and warnings
     $ log-defer-viz file --verbosity 25  ## numeric verbosity threshold
     $ log-defer-viz file --nowarn  ## muffle warn logs (so show error and info)
     $ log-defer-viz file --nologs  ## don't show log section

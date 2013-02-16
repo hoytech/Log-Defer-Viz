@@ -10,6 +10,49 @@ use Term::Size;
 use Log::Defer::Viz;
 
 
+my @opt_spec = (
+  ## INPUT FORMAT
+ 
+  'input-format=s',
+
+  ## DATE
+
+  'date!',
+  'since-now',
+
+  ## FILTERING
+
+  'logs!',
+
+  'verbosity=i',
+  'error!',
+  'warn!',
+  'info!',
+  'debug!',
+
+  'quiet|q',
+  'verbose|v',
+
+  'colour!',
+  'color!', ## alias
+
+  ## TIMERS
+
+  'timers!',
+  'timer-columns=i',
+
+  ## DATA SECTION
+
+  'data!',
+  'data-format=s',
+  'data-only',
+
+  ## MISC
+
+  'help|h|?',
+  'grep|g=s',
+);
+
 
 my $opt = {
     'input-format' => 'json',
@@ -36,46 +79,7 @@ my $opt = {
     'data-only' => 0,
 };
 
-GetOptions($opt,
-           'help|h|?',
-
-           ## INPUT FORMAT
- 
-           'input-format=s',
-
-           ## DATE
-
-           'date!',
-           'since-now',
-
-           ## FILTERING
-
-           'logs!',
-
-           'verbosity=i',
-           'error!',
-           'warn!',
-           'info!',
-           'debug!',
-
-           'quiet|q',
-           'verbose|v',
-
-           'colour!',
-           'color!', ## alias
-
-           ## TIMERS
-
-           'timers!',
-           'timer-columns=i',
-
-           ## DATA SECTION
-
-           'data!',
-           'data-format=s',
-           'data-only',
-
-) || die "GetOptions failed";
+GetOptions($opt, @opt_spec) || die "GetOptions failed";
 
 
 
@@ -302,12 +306,12 @@ log-defer-viz - command-line utility for rendering log messages created by L<Log
 
 =head1 INPUT FORMAT
 
-The only input format currently implemented is newline-separated JSON.
-
     $ log-defer-viz file --input-format=json  ## default is newline separated JSON
     $ log-defer-viz file --input-format=sereal  ## Sereal::Decoder (not impl)
     $ log-defer-viz file --input-format=messagepack  ## Data::MessagePack (not impl)
     $ log-defer-viz file --input-format=storable  ## Storable (not impl)
+
+Note: The only input format currently implemented is newline-separated JSON.
 
 =head1 LOG MESSAGES
 

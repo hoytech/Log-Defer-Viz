@@ -117,6 +117,11 @@ my ($term_cols, $term_rows) = Term::Size::chars(*STDOUT{IO});
 $columns = $term_cols if $term_cols;
 
 
+if ($opt->{grep}) {
+  $opt->{grep} = eval('sub { local $_ = $_[0]; ' . $opt->{grep} . '}');
+}
+
+
 
 unshift(@ARGV, '-') unless @ARGV;
 while (my $file = shift) {
@@ -146,6 +151,8 @@ while (my $file = shift) {
 
 sub handle_entry {
   my ($entry) = @_;
+
+  return if $opt->{grep} && !$opt->{grep}->($entry);
 
   my $millis = '';
 
@@ -339,6 +346,12 @@ Data is extra embedded information in the log file. The available outputs are C<
     $ log-defer-viz file --data-format=json  ## compact, not pretty
     $ log-defer-viz file --data-format=dumper  ## Data::Dumper
     $ log-defer-viz file --data-only  ## only show data
+
+=head1 MISC
+
+    $ log-defer-viz file --help  ## the text you're reading now
+    $ log-defer-viz file --grep '$_->{data}'  ## grep for records that have a data section.
+                                              ## $_ is the entire Log::Defer entry.
 
 =head1 SEE ALSO
 

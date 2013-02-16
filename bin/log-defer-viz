@@ -1,57 +1,77 @@
 #!/usr/bin/env perl
 
-use common::sense;;
+use common::sense;
 
-use Data::Dumper;
 use JSON::XS;
-use Date::Format;
 use Getopt::Long;
+use Term::ANSIColor;
+use Term::Size;
 
 use Log::Defer::Viz;
 
 
 
-my $columns = 100;
+my $opt = {
+    'input-format' => 'json',
 
-if (eval { require Term::Size; }) {
-  my ($term_cols, $term_rows) = Term::Size::chars(*STDOUT{IO});
-  $columns = $term_cols if $term_cols;
-}
+    date => 1,
+    'since-now' => 0,
 
+    logs => 1,
+    verbosity => 30,
+    error => undef,
+    warn => undef,
+    info => undef,
+    debug => undef,
+    quiet => 0,
+    verbose => 0,
+    colour => 1,
+    color => undef, ## alias
 
+    timers => 1,
+    'timer-columns' => 100,
 
-my $opt = {};
+    'data' => undef,
+    'data-format' => 'json-pretty',
+    'data-only' => 0,
+};
 
 GetOptions($opt,
+           'help|h|?',
+
            ## INPUT FORMAT
  
            'input-format=s',
 
+           ## DATE
+
+           'date!',
+           'since-now',
+
            ## FILTERING
 
-           'logs',
+           'logs!',
 
-           'error',
-           'warn',
-           'info',
-           'debug',
-
-           'quiet',
-           'verbose|v',
            'verbosity=i',
+           'error!',
+           'warn!',
+           'info!',
+           'debug!',
+
+           'quiet|q',
+           'verbose|v',
+
+           'colour!',
+           'color!', ## alias
 
            ## TIMERS
 
-           'timers',
-
+           'timers!',
            'timer-columns=i',
-           'since-now',
-           'timer-logs',
 
            ## DATA SECTION
 
-           'data',
-
+           'data!',
            'data-format=s',
            'data-only',
 
@@ -59,18 +79,144 @@ GetOptions($opt,
 
 
 
-while(<>) {
-  my $entry = decode_json($_);
+if ($opt->{help}) {
+  require Pod::Perldoc;
+  @ARGV = ('-F', $0);
+  Pod::Perldoc->run();
+}
 
-  print "--- " . time2str("%Y-%m-%d %I:%M:%S", $entry->{start}) . " ---\n";
 
-  foreach my $log (@{ $entry->{logs} }) {
-    print '  | ' . format_time_offset($log->[0]) . ' [' . num_to_level($log->[1]) . '] ' . $log->[2] . "\n";
+die "Only json input-format is currently supported" unless $opt->{'input-format'} eq 'json';
+
+$opt->{colour} = $opt->{color} if defined $opt->{color};
+ 
+if ($opt->{verbose} && $opt->{quiet}) {
+  die "--verbose and --quiet are incompatible";
+} elsif ($opt->{verbose}) {
+  $opt->{verbosity} = 40;
+  $opt->{data} = 1 unless (defined $opt->{data} && !$opt->{data});
+} elsif ($opt->{quiet}) {
+  $opt->{verbosity} = 20;
+  $opt->{timers} = 0 unless !$opt->{timers};
+}
+
+
+if ($opt->{'data-only'}) {
+  $opt->{date} = $opt->{timers} = $opt->{logs} = 0;
+  $opt->{data} = 1;
+}
+
+
+my $columns = $opt->{'timer-columns'};
+
+my ($term_cols, $term_rows) = Term::Size::chars(*STDOUT{IO});
+$columns = $term_cols if $term_cols;
+
+
+
+unshift(@ARGV, '-') unless @ARGV;
+while (my $file = shift) {
+  my $fh;
+
+  ## FIXME: do this with a perl module in case zcat/bzcat aren't available
+
+  if ($file =~ /[.]gz$/) {
+    open($fh, "zcat '$file' |") || die "couldn't open $file with zcat: $!";
+  } elsif ($file =~ /[.]bz2$/) {
+    open($fh, "bzcat '$file' |") || die "couldn't open $file with bzcat: $!";
+  } elsif ($file eq '-') {
+    $fh = \*STDIN;
+  } else {
+    open($fh, '<', $file) || die "couldn't open $file: $!";
   }
 
-  print "  |_" . format_time_offset($entry->{end}) . " [END]\n";
+  while(<$fh>) {
+    my $entry = decode_json($_);
+    handle_entry($entry);
+  }
+
+  close($fh);
+}
+
+
+
+sub handle_entry {
+  my ($entry) = @_;
+
+  my $millis = '';
+
+  if ($entry->{start} =~ /[.](\d+)$/) {
+    $millis = ".$1";
+  }
+
+  if ($opt->{date}) {
+    my $datetime = '';
+
+    if ($opt->{'since-now'}) {
+      require Date::Calc;
+
+      my $elapsed = int(time - $entry->{start});
+
+      if ($elapsed <= 0) {
+        $datetime = abs($elapsed) . " seconds in the future.. clock is wrong?";
+      } else {
+        my ($Dd,$Dh,$Dm,$Ds) = Date::Calc::Normalize_DHMS(0, 0, 0, int(time - $entry->{start}));
+        $datetime .= "$Dd days " if $Dd;
+        $datetime .= "$Dh hours " if $Dh;
+        $datetime .= "$Dm minutes " if $Dm;
+        $datetime .= "$Ds seconds " if $Ds;
+
+        $datetime .= "ago";
+      }
+    } else {
+      require Date::Format;
+
+      $datetime = Date::Format::time2str("%Y-%m-%d %a %I:%M:%S$millis %Z", $entry->{start});
+    }
+
+    my $date_header = "------ " . $datetime . " ------";
+
+    $date_header = colored($date_header, 'black on_white') if $opt->{colour};
+
+    print "$date_header\n";
+  }
+
+  if ($opt->{logs}) {
+    foreach my $log (@{ $entry->{logs} }) {
+      next unless should_show_message($log->[1]);
+
+      my @log_message = @$log[2..(@$log-1)];
+
+      my $log_string = ' [' . sprintf("%5s", num_to_level($log->[1])) . ']';
+
+      if (!ref $log_message[0] && $log_message[0] !~ /\n/) {
+          $log_string .= " $log_message[0]";
+          shift @log_message;
+      }
+
+      $log_string .= ' ' . encode_json(\@log_message) if @log_message;
+
+      $log_string = colored($log_string, num_to_colour($log->[1])) if $opt->{colour};
+
+      print '  | ' . format_time_offset($log->[0]) . $log_string . "\n";
+    }
+
+    print "  |_" . format_time_offset($entry->{end}) . " [END]\n\n";
+  }
   
-  print "\n" . Log::Defer::Viz::render_timers(width => $columns-10, timers => $entry->{timers}) if $entry->{timers};
+  if ($opt->{timers}) {
+    print Log::Defer::Viz::render_timers(width => $columns-10, timers => $entry->{timers}) if $entry->{timers};
+  }
+
+  if ($entry->{data}) {
+    if ($opt->{data}) {
+      print "  Data:\n" unless $opt->{'data-only'};
+      print output_data($entry->{data});
+    } else {
+      print "  ** This log has associated data. See it with --data\n"
+        unless $opt->{quiet} || (defined $opt->{data} && !$opt->{data});
+    }
+  }
 
   print "\n";
 }
@@ -88,13 +234,55 @@ sub num_to_level {
   return $level;
 }
 
+sub num_to_colour {
+  my $level = shift;
+
+  return "bright_red" if $level <= 10;
+  return "bright_yellow" if $level <= 20;
+  return "green" if $level <= 30;
+  return "bright_blue" if $level <= 40;
+}
+
 sub format_time_offset {
   my $offset = shift;
 
   return sprintf("%.6f", $offset);
 }
 
+sub should_show_message {
+  my $level = shift;
 
+  return $opt->{error} if $level == 10 && defined $opt->{error};
+  return $opt->{warn} if $level == 20 && defined $opt->{warn};
+  return $opt->{info} if $level == 30 && defined $opt->{info};
+  return $opt->{debug} if $level == 40 && defined $opt->{debug};
+
+  return 1 if $level <= $opt->{verbosity};
+
+  return 0;
+}
+
+
+my $pretty_json_context;
+
+sub output_data {
+  my $data = shift;
+
+  if ($opt->{'data-format'} eq 'json-pretty') {
+    $pretty_json_context ||= JSON::XS->new->ascii->pretty->allow_nonref;
+    return $pretty_json_context->encode($data);
+  } elsif ($opt->{'data-format'} eq 'json') {
+    return encode_json($data);
+  } elsif ($opt->{'data-format'} eq 'yaml') {
+    require YAML;
+    return YAML::Dump($data);
+  } elsif ($opt->{'data-format'} eq 'dumper') {
+    require Data::Dumper;
+    return Dumper($data);
+  }
+
+  die "Unknown data format: $opt->{'data-format'}";
+}
 
 
 
@@ -114,33 +302,37 @@ log-defer-viz - command-line utility for rendering log messages created by L<Log
 
 =head1 INPUT FORMAT
 
-    $ log-defer-viz file --input-format=json  ## default is newline separated JSON
-    $ log-defer-viz file --input-format=sereal  ## Sereal::Decoder
-    $ log-defer-viz file --input-format=messagepack  ## Data::MessagePack
-    $ log-defer-viz file --input-format=storable  ## Storable
+The only input format currently implemented is newline-separated JSON.
 
-=head1 FILTERING
+    $ log-defer-viz file --input-format=json  ## default is newline separated JSON
+    $ log-defer-viz file --input-format=sereal  ## Sereal::Decoder (not impl)
+    $ log-defer-viz file --input-format=messagepack  ## Data::MessagePack (not impl)
+    $ log-defer-viz file --input-format=storable  ## Storable (not impl)
+
+=head1 LOG MESSAGES
 
     $ log-defer-viz file  ## by default shows error, warn, and info logs
-    $ log-defer-viz file -v  ## verbose mode (shows debug logs)
-    $ log-defer-viz file --debug  ## same: show debug logs
-    $ log-defer-viz file --quiet  ## only show errors
+    $ log-defer-viz file -v  ## verbose mode (adds debug logs and more)
+    $ log-defer-viz file --debug  ## show debug logs
+    $ log-defer-viz file --quiet  ## only show errors and warnings
     $ log-defer-viz file --verbosity 25  ## numeric verbosity threshold
     $ log-defer-viz file --nowarn  ## muffle warn logs (so show error and info)
     $ log-defer-viz file --nologs  ## don't show log section
+    $ log-defer-viz file --nocolour  ## turn off terminal colours
 
 =head1 TIMERS
 
     $ log-defer-viz file --timer-columns 80  ## width of timer chart
     $ log-defer-viz file --since-now  ## show relative to now times
                                       ##   like "34 minutes ago"
-    $ log-defer-viz file --notimer-logs  ## don't show log times on chart
     $ log-defer-viz file --notimers  ## don't show timer chart
 
 =head1 DATA SECTION
 
-    $ log-defer-viz file --data  ## show data section. default: pretty JSON
-    $ log-defer-viz file --data-format=json  ## not pretty
+Data is extra embedded information in the log file. The available outputs are C<pretty-json>, C<json>, C<yaml>, and C<dumper>.
+
+    $ log-defer-viz file --data  ## show data section. default is pretty-json
+    $ log-defer-viz file --data-format=json  ## compact, not pretty
     $ log-defer-viz file --data-format=dumper  ## Data::Dumper
     $ log-defer-viz file --data-only  ## only show data
 

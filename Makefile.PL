@@ -9,9 +9,12 @@ my %args = (
     PREREQ_PM => {
       'JSON::XS' => 0,
       'Date::Format' => 0,
+      'Date::Calc' => 0,
       'Getopt::Long' => 0,
       'common::sense' => 0,
       'Term::Size' => 0,
+      'Term::ANSIColor' => 0,
+      'Pod::Perldoc' => 0,
     },
     LIBS              => [],
     DEFINE            => '',

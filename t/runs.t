@@ -46,6 +46,4 @@ print encode_json($z);
 print Log::Defer::Viz::render_timers(width => 80, timers => $z->{timers});
 
 
-
-
-ok(1, 'FIXME');
+ok(1, 'did a render_timers');

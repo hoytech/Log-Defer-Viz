@@ -1,2 +1,4 @@
-0.001   2013-02-15
-  * Initial CPAN release
+0.200   2013-02-18
+  * Initial CPAN release: split off code from Log::Defer
+    so servers don't have to install all the libraries
+    required for log visualisation

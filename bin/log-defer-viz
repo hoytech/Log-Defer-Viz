@@ -85,6 +85,7 @@ if ($opt->{help}) {
 die "Only json input-format is currently supported" unless $opt->{'input-format'} eq 'json';
 
 $opt->{colour} = $opt->{color} if defined $opt->{color};
+delete $opt->{colour} if !-t STDOUT;
  
 if ($opt->{verbose} && $opt->{quiet}) {
   die "--verbose and --quiet are incompatible";

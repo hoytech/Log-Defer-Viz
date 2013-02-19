@@ -4,6 +4,12 @@
 
 log-defer-viz - command-line utility for rendering log messages created by L<Log::Defer>
 
+=head1 DESCRIPTION
+
+L<Log::Defer> is a module that creates structured logs. Read its documentation which explains how structured logging can help you.
+
+This module installs a command-line script that parses these logs and displays them in a readable manner.
+
 =head1 INPUT METHODS
 
     $ cat file.log | log-defer-viz
@@ -14,51 +20,72 @@ log-defer-viz - command-line utility for rendering log messages created by L<Log
 
 =head1 INPUT FORMAT
 
-    $ log-defer-viz file --input-format=json  ## default is newline separated JSON
-    $ log-defer-viz file --input-format=sereal  ## Sereal::Decoder (not impl)
-    $ log-defer-viz file --input-format=messagepack  ## Data::MessagePack (not impl)
-    $ log-defer-viz file --input-format=storable  ## Storable (not impl)
+    $ log-defer-viz --input-format=json  ## default is newline separated JSON
+    $ log-defer-viz --input-format=sereal  ## Sereal::Decoder (not impl)
+    $ log-defer-viz --input-format=messagepack  ## Data::MessagePack (not impl)
+    $ log-defer-viz --input-format=storable  ## Storable (not impl)
 
 Note: The only input format currently implemented is newline-separated JSON.
 
 =head1 LOG MESSAGES
 
-    $ log-defer-viz file  ## by default shows error, warn, and info logs
-    $ log-defer-viz file -v  ## verbose mode (adds debug logs and more)
-    $ log-defer-viz file --debug  ## show debug logs
-    $ log-defer-viz file --quiet  ## only errors and warnings
-    $ log-defer-viz file --verbosity 25  ## numeric verbosity threshold
-    $ log-defer-viz file --nowarn  ## muffle warn logs (so show error and info)
-    $ log-defer-viz file --nologs  ## don't show log section
-    $ log-defer-viz file --nocolour  ## turn off terminal colours
+    $ log-defer-viz  ## by default shows error, warn, and info logs
+    $ log-defer-viz -v  ## verbose mode (adds debug logs and more)
+    $ log-defer-viz --debug  ## show debug logs
+    $ log-defer-viz --quiet  ## only errors and warnings
+    $ log-defer-viz --verbosity 25  ## numeric verbosity threshold
+    $ log-defer-viz --nowarn  ## muffle warn logs (so show error and info)
+    $ log-defer-viz --nologs  ## don't show log section
+    $ log-defer-viz --nocolour  ## turn off terminal colours
 
 =head1 TIMERS
 
-    $ log-defer-viz file --timer-columns 80  ## width of timer chart
-    $ log-defer-viz file --since-now  ## show relative to now times
-                                      ##   like "34 minutes ago"
-    $ log-defer-viz file --notimers  ## don't show timer chart
+    $ log-defer-viz --timer-columns 80  ## width of timer chart
+    $ log-defer-viz --since-now  ## show relative to now times
+                                 ##   like "34 minutes ago"
+    $ log-defer-viz --notimers  ## don't show timer chart
 
 =head1 DATA SECTION
 
 Data is extra embedded information in the log file. The available outputs are C<pretty-json>, C<json>, C<yaml>, and C<dumper>.
 
-    $ log-defer-viz file --data  ## show data section. default is pretty-json
-    $ log-defer-viz file --data-format=json  ## compact, not pretty
-    $ log-defer-viz file --data-format=dumper  ## Data::Dumper
-    $ log-defer-viz file --data-only  ## only show data
+    $ log-defer-viz --data  ## show data section. default is pretty-json
+    $ log-defer-viz --data-format=json  ## compact, not pretty
+    $ log-defer-viz --data-format=dumper  ## Data::Dumper
+    $ log-defer-viz --data-only  ## only show data
 
 =head1 MISC
 
-    $ log-defer-viz file --help  ## the text you're reading now
-    $ log-defer-viz file --grep '$_->{data}'  ## grep for records that have a data section.
-                                              ## $_ is the entire Log::Defer entry.
+    $ log-defer-viz --help  ## the text you're reading now
+    $ log-defer-viz --grep '$_->{data}'  ## grep for records that have a data section.
+                                         ## $_ is the entire Log::Defer entry.
+
+
+=head1 GREPING
+
+As shown above, there is a C<--grep> command-line option. This lets you filter log messages using arbitrary perl code. If the expression returns true, the log message is processed and displayed as normal.
+
+Being able to do this easily is an important advantage of structured logs. With unstructured logs it is often difficult to extract all of the information related to a request and nothing else.
+
+For example, here is how to grep for all requests that took longer than 500 milliseconds:
+
+    $ log-defer-viz --grep '$_->{end} > .5' server.log
+
+Depending on your underlying storage format, it may be meaningful to grep B<before> passing to C<log-defer-viz>. Currently the only supported storage format is newline-separated JSON which I<is> designed to be pre-grepable. If your search string appears anywhere in the object, the entire log message will be displayed:
+
+    $ grep 10.9.1.2 app.log | log-defer-view
+
+The final and most error-prone way to grep Log::Defer logs is to grep the unstructured output of C<log-defer-viz>:
+
+    $ log-defer-view app.log | grep 10.9.1.2
+
+
 
 =head1 SEE ALSO
 
-L<Log::Defer::Viz github repo|https://github.com/hoytech/Log-Defer-Viz>
+L<Log::Defer>
 
-L<Log::Defer github repo|https://github.com/hoytech/Log-Defer>
+L<Log::Defer::Viz github repo|https://github.com/hoytech/Log-Defer-Viz>
 
 =head1 AUTHOR
 

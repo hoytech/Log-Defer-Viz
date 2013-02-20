@@ -6,6 +6,7 @@ use ExtUtils::MakeMaker;
 my %args = (
     NAME => 'Log::Defer::Viz',
     VERSION_FROM => 'lib/Log/Defer/Viz.pm',
+    EXE_FILES => [ 'bin/log-defer-viz', ],
     PREREQ_PM => {
       'JSON::XS' => 0,
       'Date::Format' => 0,

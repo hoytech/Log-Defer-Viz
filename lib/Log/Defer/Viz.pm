@@ -120,7 +120,7 @@ sub _time_bars {
 
 =head1 NAME
 
-Log::Defer::Viz - Visualisation routines for Log::Defer data
+Log::Defer::Viz - Visualisation script for Log::Defer data
 
 =head1 DESCRIPTION
 

@@ -282,7 +282,7 @@ sub output_data {
     return YAML::Dump($data);
   } elsif ($opt->{'data-format'} eq 'dumper') {
     require Data::Dumper;
-    return Dumper($data);
+    return Data::Dumper::Dumper($data);
   }
 
   die "Unknown data format: $opt->{'data-format'}";

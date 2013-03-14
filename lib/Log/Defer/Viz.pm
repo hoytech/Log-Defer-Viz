@@ -117,6 +117,9 @@ sub _time_bars {
 
 
 
+__END__
+
+
 
 =head1 NAME
 
@@ -141,3 +144,12 @@ Doug Hoyte, C<< <doug@hcsw.org> >>
 Copyright 2013 Doug Hoyte.
 
 This module is licensed under the same terms as perl itself.
+
+=cut
+
+
+
+
+TODO:
+
+* option --interleaved that shows events at absolute times

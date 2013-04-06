@@ -10,6 +10,15 @@ use Term::Size;
 use Log::Defer::Viz;
 
 
+## List of terminal colours in order of preference (not all terminals support bright_*)
+
+my $colour_spec = {
+    error => [qw/ bright_red red /],
+    warn => [qw/ bright_yellow yellow /],
+    info => [qw/ green /],
+    debug => [qw/ bright_blue blue /],
+};
+
 my @opt_spec = (
   ## INPUT FORMAT
  
@@ -201,7 +210,10 @@ sub handle_entry {
 
       $log_string .= ' ' . encode_json(\@log_message) if @log_message;
 
-      $log_string = colored($log_string, num_to_colour($log->[1])) if $opt->{colour};
+      if ($opt->{colour}) {
+          my $colour = num_to_colour($log->[1]);
+          $log_string = colored($log_string, $colour) if defined $colour;
+      }
 
       print '  | ' . format_time_offset($log->[0]) . $log_string . "\n";
     }
@@ -239,13 +251,34 @@ sub num_to_level {
   return $level;
 }
 
+my $terminal_colour_name_cache = {};
+
+sub get_colour_name {
+  my $name = shift;
+
+  return $terminal_colour_name_cache->{$name} if exists $terminal_colour_name_cache->{$name};
+
+  foreach my $colour_under_test (@{ $colour_spec->{$name} }) {
+    eval {
+      colored('junk', $colour_under_test);
+    };
+
+    return ($terminal_colour_name_cache->{$name} = $colour_under_test)
+      if !$@;
+  }
+
+  return ($terminal_colour_name_cache->{$name} = undef);
+}
+
 sub num_to_colour {
   my $level = shift;
 
-  return "bright_red" if $level <= 10;
-  return "bright_yellow" if $level <= 20;
-  return "green" if $level <= 30;
-  return "bright_blue" if $level <= 40;
+  return get_colour_name("error") if $level <= 10;
+  return get_colour_name("warn") if $level <= 20;
+  return get_colour_name("info") if $level <= 30;
+  return get_colour_name("debug") if $level <= 40;
+
+  return;
 }
 
 sub format_time_offset {

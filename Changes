@@ -1,3 +1,6 @@
+  * On terminals that don't support bright_* colours, fall
+    back to non-bright colours instead of erroring out
+
 0.201   2013-02-20
   * Only include terminal colours if stdout is a terminal
   * Forgot to install script in path

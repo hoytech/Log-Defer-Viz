@@ -28,16 +28,18 @@ my $z = decode_json q{
        "data" : {
           "junkdata" : "some data"
        },
-       "timers" : {
-          "junktimer" : [
+       "timers" : [
+          [
+             "junktimer",
              0.000224,
              0.100655
           ],
-          "junktimer2" : [
+          [
+             "junktimer2",
              0.000281,
              0.202386
           ]
-       }
+       ]
     }
 };
 

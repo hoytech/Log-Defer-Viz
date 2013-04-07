@@ -15,8 +15,20 @@ sub render_timers {
   my $width = $arg{width} || 80;
   my $timers = $arg{timers} || croak "need timers";
 
-  my @timer_names = sort { $timers->{$a}->[0] <=> $timers->{$b}->[0] } keys %$timers;
-  my @timer_names_by_end_time = sort { $timers->{$a}->[1] <=> $timers->{$b}->[1] } keys %$timers;
+  ## Support old style timers where they were stored in a hash:
+
+  if (ref $timers eq 'HASH') {
+    my $temp_timers = [];
+
+    foreach my $timer_name (keys %$timers) {
+      push @$temp_timers, [ $timer_name, @{ $timers->{$timer_name} }, ];
+    }
+
+    $timers = $temp_timers;
+  }
+
+  my @sorted_timers = sort { $a->[1] <=> $b->[1] } @$timers;
+  my @sorted_timers_by_end_time = sort { $a->[2] <=> $b->[2] } @$timers;
 
   my $output = '';
 
@@ -26,11 +38,9 @@ sub render_timers {
   my $max_time = 0;
   my $max_namelen = 11;
 
-  foreach my $timer_name (@timer_names) {
-    my $timer = $timers->{$timer_name};
-
-    $max_time = $timer->[1] if $timer->[1] > $max_time;
-    $max_namelen = length($timer_name)+1 if length($timer_name)+1 > $max_namelen;
+  foreach my $timer (@sorted_timers) {
+    $max_time = $timer->[2] if $timer->[2] > $max_time;
+    $max_namelen = length($timer->[0])+1 if length($timer->[0])+1 > $max_namelen;
   }
 
 
@@ -38,13 +48,12 @@ sub render_timers {
 
   my $scaling = ($width - $max_namelen - 8) / $max_time;
 
-  foreach my $timer_name (@timer_names) {
-    my $timer = $timers->{$timer_name};
-    $output .= sprintf("%${max_namelen}s ", $timer_name);
+  foreach my $timer (@sorted_timers) {
+    $output .= sprintf("%${max_namelen}s ", $timer->[0]);
 
-    $output .= ' ' x int($timer->[0] * $scaling);
+    $output .= ' ' x int($timer->[1] * $scaling);
 
-    my $bar_width = int(($timer->[1] - $timer->[0]) * $scaling) - 1;
+    my $bar_width = int(($timer->[2] - $timer->[1]) * $scaling) - 1;
 
     if ($bar_width > 0) {
       $output .= '|';
@@ -67,10 +76,10 @@ sub render_timers {
 
   $output .= 'times in ms ';
   $output .= ' ' x ($max_namelen - 11);
-  $output .= _time_bars($max_time, $scaling, [ map { $timers->{$_}->[0] } @timer_names ], $seen);
+  $output .= _time_bars($max_time, $scaling, [ map { $_->[1] } @sorted_timers ], $seen);
 
   $output .= ' ' x ($max_namelen + 1);
-  $output .= _time_bars($max_time, $scaling, [ map { $timers->{$_}->[1] } @timer_names_by_end_time ], $seen);
+  $output .= _time_bars($max_time, $scaling, [ map { $_->[2] } @sorted_timers_by_end_time ], $seen);
 
   return $output;
 }

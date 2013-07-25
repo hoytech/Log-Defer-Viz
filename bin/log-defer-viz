@@ -401,11 +401,11 @@ For example, here is how to grep for all requests that took longer than 500 mill
 
 Depending on your underlying storage format, it may be meaningful to grep B<before> passing to C<log-defer-viz>. Currently the only supported storage format is newline-separated JSON which I<is> designed to be pre-grepable. If your search string appears anywhere in the object, the entire log message will be displayed:
 
-    $ grep 10.9.1.2 app.log | log-defer-view
+    $ grep 10.9.1.2 app.log | log-defer-viz
 
 The final and most error-prone way to grep Log::Defer logs is to grep the unstructured output of C<log-defer-viz>:
 
-    $ log-defer-view app.log | grep 10.9.1.2
+    $ log-defer-viz app.log | grep 10.9.1.2
 
 
 

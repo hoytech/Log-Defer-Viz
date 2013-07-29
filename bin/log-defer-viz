@@ -6,6 +6,7 @@ use JSON::XS;
 use Getopt::Long;
 use Term::ANSIColor;
 use Term::Size;
+use Try::Tiny;
 
 use Log::Defer::Viz;
 
@@ -143,8 +144,14 @@ while (my $file = shift) {
   }
 
   while(<$fh>) {
-    my $entry = decode_json($_);
-    handle_entry($entry);
+    try {
+      my $entry = decode_json($_);
+      handle_entry($entry);
+    } catch {
+      if ($opt->{verbose}) {
+        print "Error parsing log line: $_";
+      }
+    }
   }
 
   close($fh);

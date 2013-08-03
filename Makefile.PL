@@ -16,6 +16,7 @@ my %args = (
       'Term::Size' => 0,
       'Term::ANSIColor' => 0,
       'Pod::Perldoc' => 0,
+      'Try::Tiny' => 0,
     },
     LIBS              => [],
     DEFINE            => '',

@@ -464,7 +464,7 @@ The final and most error-prone way to grep Log::Defer logs is to grep the unstru
 
 Similar to C<--grep>, there is also a C<--map> command-line option. If this option is passed in, the only thing that is output is whatever your C<--map> expression returns.
 
-For example, if you are putting the PID into the data section with C< <$log->data->{pid} = $$ >>, then you can extract the PID like so:
+For example, if you are putting the PID into the data section with C<< $log->data->{pid} = $$ >>, then you can extract the PID like so:
 
     $ log-defer-viz --map '$_->{data}->{pid}' app.log
     9765

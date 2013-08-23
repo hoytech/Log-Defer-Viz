@@ -124,10 +124,12 @@ $columns = $term_cols if $term_cols;
 
 if ($opt->{grep}) {
   $opt->{grep} = eval('sub { local $_ = $_[0]; ' . $opt->{grep} . '}');
+  die "Error compiling --grep expression: $@" if $@;
 }
 
 if ($opt->{map}) {
   $opt->{map} = eval('sub { local $_ = $_[0]; ' . $opt->{map} . '}');
+  die "Error compiling --map expression: $@" if $@;
 }
 
 

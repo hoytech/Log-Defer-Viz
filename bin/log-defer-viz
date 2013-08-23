@@ -471,7 +471,7 @@ For example, if you are putting the PID into the data section with C<< $log->dat
     9768
     9771
 
-Since you have access to any perl functions you need, including L<JSON::XS>. Also, you can combine C<--map> and C<--grep>. For example, here is how to do a "pass-through" grep where the output is another valid JSON-encoded L<Log::Defer> file:
+As with C<--grep>, you have access to any perl functions you need including L<JSON::XS>. Also, you can combine C<--map> and C<--grep>. For example, here is how to do a "pass-through" grep where the output is another valid JSON-encoded L<Log::Defer> file:
 
     $ log-defer-viz -g '_->{data}->{username} eq "jimmy"' \
                     -m 'encode_json _'                    \

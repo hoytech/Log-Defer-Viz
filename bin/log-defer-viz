@@ -60,6 +60,7 @@ my @opt_spec = (
 
   'help|h|?',
   'grep|g=s',
+  'map|m=s',
 );
 
 my $opt = {
@@ -125,6 +126,9 @@ if ($opt->{grep}) {
   $opt->{grep} = eval('sub { local $_ = $_[0]; ' . $opt->{grep} . '}');
 }
 
+if ($opt->{map}) {
+  $opt->{map} = eval('sub { local $_ = $_[0]; ' . $opt->{map} . '}');
+}
 
 
 unshift(@ARGV, '-') unless @ARGV;
@@ -163,6 +167,13 @@ sub handle_entry {
   my ($entry) = @_;
 
   return if $opt->{grep} && !$opt->{grep}->($entry);
+
+  if ($opt->{map}) {
+    my $output = $opt->{map}->($entry);
+    $output = "$output\n" unless $output =~ /\n$/;;
+    print $output;
+    return;
+  }
 
   my $millis = '';
 

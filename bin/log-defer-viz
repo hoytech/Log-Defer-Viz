@@ -437,6 +437,7 @@ Data is extra embedded information in the log file. The available outputs are C<
     $ log-defer-viz --help  ## the text you're reading now
     $ log-defer-viz --grep '$_->{data}'  ## grep for records that have a data section.
                                          ## $_ is the entire Log::Defer entry.
+    $ log-defer-viz --map '$_->{data}->{username}'  ## Extract username from data
 
 
 =head1 GREPING
@@ -456,6 +457,28 @@ Depending on your underlying storage format, it may be meaningful to grep B<befo
 The final and most error-prone way to grep Log::Defer logs is to grep the unstructured output of C<log-defer-viz>:
 
     $ log-defer-viz app.log | grep 10.9.1.2
+
+
+
+=head1 MAPPING
+
+Similar to C<--grep>, there is also a C<--map> command-line option. If this option is passed in, the only thing that is output is whatever your C<--map> expression returns.
+
+For example, if you are putting the PID into the data section with C< <$log->data->{pid} = $$ >>, then you can extract the PID like so:
+
+    $ log-defer-viz --map '$_->{data}->{pid}' app.log
+    9765
+    9768
+    9771
+
+Since you have access to any perl functions you need, including L<JSON::XS>. Also, you can combine C<--map> and C<--grep>. For example, here is how to do a "pass-through" grep where the output is another valid JSON-encoded L<Log::Defer> file:
+
+    $ log-defer-viz -g '_->{data}->{username} eq "jimmy"' \
+                    -m 'encode_json _'                    \
+                    app.log                               \
+                    > jimmys-requests.log
+
+Note that the above also takes advantage of the C<-g> and C<-m> option shortcuts for C<--map> and C<--grep> respectively. It also uses the special C<_> shortcut which is an abbreviation for C<$_>.
 
 
 

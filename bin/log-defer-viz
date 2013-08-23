@@ -59,7 +59,7 @@ my @opt_spec = (
   ## MISC
 
   'help|h|?',
-  'grep|g=s',
+  'grep|filter|g=s',
   'map|m=s',
 );
 

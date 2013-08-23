@@ -150,14 +150,17 @@ while (my $file = shift) {
   }
 
   while(<$fh>) {
+    my $entry;
+
     try {
-      my $entry = decode_json($_);
-      handle_entry($entry);
+      $entry = decode_json($_);
     } catch {
       if ($opt->{verbose}) {
-        print "Error parsing log line: $_";
+        print STDERR "Error parsing log line: $_";
       }
-    }
+    };
+
+    handle_entry($entry) if defined $entry;
   }
 
   close($fh);
@@ -168,12 +171,36 @@ while (my $file = shift) {
 sub handle_entry {
   my ($entry) = @_;
 
-  return if $opt->{grep} && !$opt->{grep}->($entry);
+  if ($opt->{grep}) {
+    my $result;
+
+    eval {
+      $result = $opt->{grep}->($entry);
+    };
+
+    if ($@) {
+      print STDERR "Run-time error in --grep expression, skipping record: $@";
+      return;
+    }
+
+    return unless $result;
+  }
 
   if ($opt->{map}) {
-    my $output = $opt->{map}->($entry);
+    my $output;
+
+    eval {
+      $output = $opt->{map}->($entry);
+    };
+
+    if ($@) {
+      print STDERR "Run-time error in --map expression, skipping record: $@";
+      return;
+    }
+
     $output = "$output\n" unless $output =~ /\n$/;;
     print $output;
+
     return;
   }
 

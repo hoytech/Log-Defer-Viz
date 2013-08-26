@@ -116,7 +116,13 @@ if ($opt->{'data-only'}) {
   $opt->{data} = 1;
 }
 
-my $count = {} if exists $opt->{count};
+
+my $count = {};
+
+foreach my $key (@{ $opt->{count} }) {
+  $count->{$key} = {};
+}
+
 
 my $columns = $opt->{'timer-columns'};
 
@@ -291,9 +297,6 @@ sub handle_entry {
     }
 
     foreach my $key (@{ $opt->{count} }) {
-      if (!exists $count->{$key}) {
-        $count->{$key} = {};
-      }
       if (exists $entry->{data}->{$key}) {
         $count->{$key}->{$entry->{data}->{$key}} += 1;
       }

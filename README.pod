@@ -54,6 +54,13 @@ Data is extra embedded information in the log file. The available outputs are C<
     $ log-defer-viz --data-format=dumper  ## Data::Dumper
     $ log-defer-viz --data-only  ## only show data
 
+=head1 COUNT
+
+The count parameter provides a method to count the number of times a specific key/value appears in the data section of the log file.
+
+    $ log-defer-viz --data --count ip_address ## Display how many log lines for each ip address
+    $ log-defer-viz --data --count ip_address --count user_id ## Display how many log lines for each ip address and each user_id
+
 =head1 MISC
 
     $ log-defer-viz --help  ## the text you're reading now

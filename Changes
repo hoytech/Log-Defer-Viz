@@ -1,3 +1,14 @@
+0.310   2013-09-01
+  * Don't die on log lines that don't start with JSON
+    useful for parsing mixed log-defer/free-form formats
+    (thanks mikep)
+  * --map feature: transform log-defer messages into
+    arbitrary strings
+  * Better error reporting when --grep expressions
+    fail to compile or throw run-time errors
+  * --count option for creating reports by inspecting
+    the data section (thanks mikep)
+
 0.300   2013-04-08
   * Data::Dumper data view mode was broken
   * Allow forcing colours on, even if STDOUT is not a

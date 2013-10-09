@@ -1,3 +1,5 @@
+  * Fix bug in date formatting (thanks Mike R)
+
 0.310   2013-09-01
   * Don't die on log lines that don't start with JSON
     useful for parsing mixed log-defer/free-form formats

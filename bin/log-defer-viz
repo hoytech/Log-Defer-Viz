@@ -247,7 +247,7 @@ sub handle_entry {
     } else {
       require Date::Format;
 
-      $datetime = Date::Format::time2str("%Y-%m-%d %a %I:%M:%S$millis %Z", $entry->{start});
+      $datetime = Date::Format::time2str("%Y-%m-%d %a %H:%M:%S$millis %Z", $entry->{start});
     }
 
     my $date_header = "------ " . $datetime . " ------";

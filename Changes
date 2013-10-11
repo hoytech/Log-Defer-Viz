@@ -1,4 +1,5 @@
   * Fix bug in date formatting (thanks Mike R)
+  * Show unix time along with formatted date
 
 0.310   2013-09-01
   * Don't die on log lines that don't start with JSON

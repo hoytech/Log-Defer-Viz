@@ -226,7 +226,7 @@ sub handle_entry {
   }
 
   if ($opt->{date}) {
-    my $datetime = '';
+    my $formatted = '';
 
     if ($opt->{'since-now'}) {
       require Date::Calc;
@@ -234,23 +234,23 @@ sub handle_entry {
       my $elapsed = int(time - $entry->{start});
 
       if ($elapsed <= 0) {
-        $datetime = abs($elapsed) . " seconds in the future.. clock is wrong?";
+        $formatted = abs($elapsed) . " seconds in the future.. clock is wrong?";
       } else {
         my ($Dd,$Dh,$Dm,$Ds) = Date::Calc::Normalize_DHMS(0, 0, 0, int(time - $entry->{start}));
-        $datetime .= "$Dd days " if $Dd;
-        $datetime .= "$Dh hours " if $Dh;
-        $datetime .= "$Dm minutes " if $Dm;
-        $datetime .= "$Ds seconds " if $Ds;
+        $formatted .= "$Dd days " if $Dd;
+        $formatted .= "$Dh hours " if $Dh;
+        $formatted .= "$Dm minutes " if $Dm;
+        $formatted .= "$Ds seconds " if $Ds;
 
-        $datetime .= "ago";
+        $formatted .= "ago";
       }
     } else {
       require Date::Format;
 
-      $datetime = Date::Format::time2str("%Y-%m-%d %a %H:%M:%S$millis %Z", $entry->{start});
+      $formatted = Date::Format::time2str("%Y-%m-%d %a %H:%M:%S$millis %Z", $entry->{start});
     }
 
-    my $date_header = "------ " . $datetime . " ------";
+    my $date_header = "------ $formatted ($entry->{start}) ------";
 
     $date_header = colored($date_header, 'black on_white') if $opt->{colour};
 

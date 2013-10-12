@@ -1,3 +1,4 @@
+0.311   2013-10-12
   * Fix bug in date formatting (thanks Mike R)
   * Show unix time along with formatted date
 

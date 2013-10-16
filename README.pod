@@ -95,19 +95,33 @@ Similar to C<--grep>, there is also a C<--map> command-line option. If this opti
 
 For example, if you are putting the PID into the data section with C<< $log->data->{pid} = $$ >>, then you can extract the PID like so:
 
-    $ log-defer-viz --map '$_->{data}->{pid}' app.log
+    $ log-defer-viz --map '$_->{data}->{pid}' < app.log
     9765
     9768
     9771
 
-As with C<--grep>, you have access to any perl functions you need including L<JSON::XS>. Also, you can combine C<--map> and C<--grep>. For example, here is how to do a "pass-through" grep where the output is another valid JSON-encoded L<Log::Defer> file:
+Join together fields with a pipe (also shows the special C<_> shortcut which is an abbreviation for C<$_>):
 
-    $ log-defer-viz -g '_->{data}->{username} eq "jimmy"' \
-                    -m 'encode_json _'                    \
-                    app.log                               \
+    $ log-defer-viz --map 'join "|", _->{data}{pid}, _->{start}' < app.log
+    9765|1362166673.95104
+    9768|1362168038.85611
+    9771|1362169482.39561
+
+Make dates readable (C<localtime> in scalar context is readable):
+
+    $ log-defer-viz --map 'join "|", _->{data}{pid}, "".localtime(_->{start})' < app.log
+    9765|Fri Mar  1 14:37:53 2013
+    9768|Fri Mar  1 15:00:38 2013
+    9771|Fri Mar  1 15:24:42 2013
+
+As with C<--grep>, you have access to any perl functions you need. Also, you can combine C<--map> and C<--grep>. For example, here is how to do a "pass-through" grep where the output is another valid JSON-encoded L<Log::Defer> file:
+
+    $ log-defer-viz -g '_->{data}{username} eq "jimmy"' \
+                    -m 'encode_json _'                  \
+                    < app.log                           \
                     > jimmys-requests.log
 
-Note that the above also takes advantage of the C<-g> and C<-m> option shortcuts for C<--map> and C<--grep> respectively. It also uses the special C<_> shortcut which is an abbreviation for C<$_>.
+Note that the above also takes advantage of the C<-g> and C<-m> option shortcuts for C<--grep> and C<--map> respectively.
 
 
 

@@ -148,11 +148,14 @@ unshift(@ARGV, '-') unless @ARGV;
 while (my $file = shift) {
   my $fh;
 
-  ## FIXME: do this with a perl module in case zcat/bzcat aren't available
+  ## FIXME: Do these with perl modules in case zcat/bzcat aren't available.
+  ##        This would also fix stupid single quote limitation below.
 
   if ($file =~ /[.]gz$/) {
+    die qq{filename "$file" can't contain single quotes } if $file =~ /'/;
     open($fh, "zcat '$file' |") || die "couldn't open $file with zcat: $!";
   } elsif ($file =~ /[.]bz2$/) {
+    die qq{filename "$file" can't contain single quotes } if $file =~ /'/;
     open($fh, "bzcat '$file' |") || die "couldn't open $file with bzcat: $!";
   } elsif ($file eq '-') {
     $fh = \*STDIN;

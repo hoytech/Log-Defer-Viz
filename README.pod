@@ -44,6 +44,7 @@ Note: The only input format currently implemented is newline-separated JSON.
     $ log-defer-viz --since-now  ## show relative to now times
                                  ##   like "34 minutes ago"
     $ log-defer-viz --notimers  ## don't show timer chart
+    $ log-defer-viz --tz UTC  ## show times in UTC, not local
 
 =head1 DATA SECTION
 

@@ -28,6 +28,7 @@ my @opt_spec = (
 
   'date!',
   'since-now',
+  'tz=s',
 
   ## FILTERING
 
@@ -249,7 +250,7 @@ sub handle_entry {
     } else {
       require Date::Format;
 
-      $formatted = Date::Format::time2str("%Y-%m-%d %a %H:%M:%S$millis %Z", $entry->{start});
+      $formatted = Date::Format::time2str("%Y-%m-%d %a %H:%M:%S$millis %Z", $entry->{start}, $opt->{tz});
     }
 
     my $date_header = "------ $formatted ($entry->{start}) ------";
@@ -442,6 +443,7 @@ Note: The only input format currently implemented is newline-separated JSON.
     $ log-defer-viz --since-now  ## show relative to now times
                                  ##   like "34 minutes ago"
     $ log-defer-viz --notimers  ## don't show timer chart
+    $ log-defer-viz --tz UTC  ## show times in UTC, not local
 
 =head1 DATA SECTION
 

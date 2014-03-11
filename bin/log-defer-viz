@@ -62,6 +62,7 @@ my @opt_spec = (
   'help|h|?',
   'grep|filter|g=s',
   'map|m=s',
+  'preserve-newlines|pn'
 );
 
 my $opt = {
@@ -80,6 +81,8 @@ my $opt = {
 
     'data-format' => 'json-pretty',
     'data-only' => 0,
+
+    'preserve-newlines' => 0,
 };
 
 GetOptions($opt, @opt_spec) || die "GetOptions failed";
@@ -268,16 +271,33 @@ sub handle_entry {
 
       my $log_string = ' [' . sprintf("%5s", num_to_level($log->[1])) . ']';
 
-      if (!ref $log_message[0] && $log_message[0] !~ /\n/) {
+      if (@log_message > 1 && !ref $log_message[0] && $log_message[0] !~ /\n/) {
           $log_string .= " $log_message[0]";
           shift @log_message;
       }
 
-      $log_string .= ' ' . encode_json(\@log_message) if @log_message;
+      if (@log_message == 1 && !ref $log_message[0] && !$opt->{'preserve-newlines'}) {
+        $log_string .= ' ' . $log_message[0];
+      }
+      else {
+        $log_string .= ' ' . encode_json(\@log_message) if @log_message;
+      }
 
       if ($opt->{colour}) {
           my $colour = num_to_colour($log->[1]);
+          unless ($opt->{'preserve-newlines'}) {
+            my $white_bar = colored('|', 'white').color($colour);
+            $log_string =~ s/\n(?=.)/\n  $white_bar                  /g;
+            chomp $log_string;
+          }
           $log_string = colored($log_string, $colour) if defined $colour;
+      }
+      else {
+          # whitespace insertion to indent&align with '   | 0.003226 [ WARN] '
+          unless ($opt->{'preserve-newlines'}) {
+            $log_string =~ s/\n(?=.)/\n  |                  /g;
+            chomp $log_string;
+          }
       }
 
       print '  | ' . format_time_offset($log->[0]) . $log_string . "\n";
@@ -436,6 +456,7 @@ Note: The only input format currently implemented is newline-separated JSON.
     $ log-defer-viz --nowarn  ## muffle warn logs (so show error and info)
     $ log-defer-viz --nologs  ## don't show log section
     $ log-defer-viz --nocolour  ## turn off terminal colours
+    $ log-defer-viz --preserve-newlines # dont indent log messages to align with log-defer-viz output
 
 =head1 TIMERS
 

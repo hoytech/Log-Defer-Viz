@@ -287,7 +287,7 @@ sub handle_entry {
           my $colour = num_to_colour($log->[1]);
           unless ($opt->{'preserve-newlines'}) {
             my $white_bar = colored('|', 'white').color($colour);
-            $log_string =~ s/\n(?=.)/\n  $white_bar                  /g;
+            $log_string =~ s/\n(?=.)/\n  $white_bar                  /gs;
             chomp $log_string;
           }
           $log_string = colored($log_string, $colour) if defined $colour;

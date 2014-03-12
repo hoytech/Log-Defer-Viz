@@ -1,3 +1,12 @@
+0.315   2014-03-11
+  * Print log messages that contain newlines in a nicely
+    formatted way that's great for stack traces and data
+    dumper output (thanks Matt Phillips)
+  * --tz option that prints timestamps in the timezone you
+    specify instead of the default system local-time
+  * Detect and report limitation where .gz and .bz2 filenames
+    can't contain ' characters
+
 0.311   2013-10-12
   * Fix bug in date formatting (thanks Mike R)
   * Show unix time along with formatted date

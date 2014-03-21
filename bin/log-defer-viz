@@ -398,7 +398,7 @@ sub output_data {
   my $data = shift;
 
   if ($opt->{'data-format'} eq 'json-pretty') {
-    $pretty_json_context ||= JSON::XS->new->ascii->pretty->allow_nonref;
+    $pretty_json_context ||= JSON::XS->new->ascii->pretty->canonical->allow_nonref;
     return $pretty_json_context->encode($data);
   } elsif ($opt->{'data-format'} eq 'json') {
     return encode_json($data);
@@ -407,6 +407,13 @@ sub output_data {
     return YAML::Dump($data);
   } elsif ($opt->{'data-format'} eq 'dumper') {
     require Data::Dumper;
+    local $Data::Dumper::Terse = 1;
+    local $Data::Dumper::Indent = 1;
+    local $Data::Dumper::Useqq = 1;
+    local $Data::Dumper::Deparse = 1;
+    local $Data::Dumper::Quotekeys = 0;
+    local $Data::Dumper::Sortkeys = 1;
+
     return Data::Dumper::Dumper($data);
   }
 

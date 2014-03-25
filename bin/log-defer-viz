@@ -62,6 +62,7 @@ my @opt_spec = (
   'help|h|?',
   'grep|filter|g=s',
   'map|m=s',
+  'follow|f',
   'preserve-newlines|pn'
 );
 
@@ -82,6 +83,7 @@ my $opt = {
     'data-format' => 'json-pretty',
     'data-only' => 0,
 
+    'follow' => 0,
     'preserve-newlines' => 0,
 };
 
@@ -148,6 +150,10 @@ if ($opt->{map}) {
 
 
 unshift(@ARGV, '-') unless @ARGV;
+if (@ARGV > 1 && $opt->{follow}) {
+  die "You've specified --follow but have also provided multiple files, which doesn't make sense. Did you mean to do this?";
+}
+
 while (my $file = shift) {
   my $fh;
 
@@ -156,14 +162,19 @@ while (my $file = shift) {
 
   if ($file =~ /[.]gz$/) {
     die qq{filename "$file" can't contain single quotes } if $file =~ /'/;
-    open($fh, "zcat '$file' |") || die "couldn't open $file with zcat: $!";
+    open($fh, '-|', "zcat '$file'") || die "couldn't open $file with zcat: $!";
   } elsif ($file =~ /[.]bz2$/) {
     die qq{filename "$file" can't contain single quotes } if $file =~ /'/;
-    open($fh, "bzcat '$file' |") || die "couldn't open $file with bzcat: $!";
+    open($fh, '-|', "bzcat '$file'") || die "couldn't open $file with bzcat: $!";
   } elsif ($file eq '-') {
     $fh = \*STDIN;
   } else {
-    open($fh, '<', $file) || die "couldn't open $file: $!";
+    if ($opt->{follow}) {
+      open($fh, '-|', "tail -f -n +0 $file") || die "couldn't open $file: $!";
+    }
+    else {
+      open($fh, '<', $file) || die "couldn't open $file: $!";
+    }
   }
 
   while(<$fh>) {
@@ -441,6 +452,7 @@ This module installs a command-line script that parses these logs and displays t
     $ cat file.log | log-defer-viz
     $ log-defer-viz < file.log
     $ log-defer-viz file.log
+    $ log-defer-viz -f file.log # continuously tail file
     $ log-defer-viz file.log file2.log
     $ log-defer-viz archived.log.gz more_logs.bz2
 
@@ -562,6 +574,10 @@ L<Log::Defer::Viz github repo|https://github.com/hoytech/Log-Defer-Viz>
 =head1 AUTHOR
 
 Doug Hoyte, C<< <doug@hcsw.org> >>
+
+=head1 CONTRIBUTORS
+
+Matt Phillips, C<< <mattp@cpan.org> >>
 
 =head1 COPYRIGHT & LICENSE
 

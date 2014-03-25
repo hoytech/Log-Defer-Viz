@@ -157,20 +157,15 @@ if (@ARGV > 1 && $opt->{follow}) {
 while (my $file = shift) {
   my $fh;
 
-  ## FIXME: Do these with perl modules in case zcat/bzcat aren't available.
-  ##        This would also fix stupid single quote limitation below.
-
   if ($file =~ /[.]gz$/) {
-    die qq{filename "$file" can't contain single quotes } if $file =~ /'/;
-    open($fh, '-|', "zcat '$file'") || die "couldn't open $file with zcat: $!";
+    open($fh, '-|', qw/zcat/, $file) || die "couldn't open $file with zcat: $!";
   } elsif ($file =~ /[.]bz2$/) {
-    die qq{filename "$file" can't contain single quotes } if $file =~ /'/;
-    open($fh, '-|', "bzcat '$file'") || die "couldn't open $file with bzcat: $!";
+    open($fh, '-|', qw/bzcat/, $file) || die "couldn't open $file with bzcat: $!";
   } elsif ($file eq '-') {
     $fh = \*STDIN;
   } else {
     if ($opt->{follow}) {
-      open($fh, '-|', "tail -f -n +0 '$file'") || die "couldn't open $file: $!";
+      open($fh, '-|', qw/tail -f -n +0/, $file) || die "couldn't open $file: $!";
     }
     else {
       open($fh, '<', $file) || die "couldn't open $file: $!";

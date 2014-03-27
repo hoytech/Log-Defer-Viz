@@ -1,3 +1,11 @@
+0.320   2014-03-26
+  * Format data section output more nicely (Matt Phillips)
+  * -f follow option for tailing log files (Matt Phillips)
+  * Fix filename limitation FIXME in .gz/.bz by using multi-var
+    open (Matt Phillips)
+  * Link to Michael Pucyk's LogDefer Python module
+  * Improve docs, update copyright year, explain _() shortcut
+
 0.315   2014-03-11
   * Print log messages that contain newlines in a nicely
     formatted way that's great for stack traces and data

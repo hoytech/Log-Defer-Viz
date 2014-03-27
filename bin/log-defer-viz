@@ -165,7 +165,7 @@ while (my $file = shift) {
     $fh = \*STDIN;
   } else {
     if ($opt->{follow}) {
-      open($fh, '-|', qw/tail -f -n +0/, $file) || die "couldn't open $file: $!";
+      open($fh, '-|', qw/tail -f -n +0/, $file) || die "couldn't open $file with tail -f: $!";
     }
     else {
       open($fh, '<', $file) || die "couldn't open $file: $!";

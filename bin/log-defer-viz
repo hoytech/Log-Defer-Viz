@@ -566,6 +566,8 @@ L<Log::Defer>
 
 L<Log::Defer::Viz github repo|https://github.com/hoytech/Log-Defer-Viz>
 
+The C<log-defer-viz> is also useful for visualising logs created by Michael Pucyk's L<LogDefer Python module|https://github.com/mikep/LogDefer> (since it outputs the same format)
+
 =head1 AUTHOR
 
 Doug Hoyte, C<< <doug@hcsw.org> >>

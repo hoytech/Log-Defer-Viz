@@ -1,3 +1,6 @@
+0.321   2014-03-26
+  * Remove file accidentally checked in to git
+
 0.320   2014-03-26
   * Format data section output more nicely (Matt Phillips)
   * -f follow option for tailing log files (Matt Phillips)

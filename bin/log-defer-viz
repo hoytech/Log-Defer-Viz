@@ -482,7 +482,7 @@ Note: The only input format currently implemented is newline-separated JSON.
 
 =head1 DATA SECTION
 
-Data is extra embedded information in the log file. The available outputs are C<pretty-json>, C<json>, C<yaml>, and C<dumper>.
+Applications can optionally log information in a "data" hash. This information is mostly designed to be extracted by programs so C<log-defer-viz> doesn't display it by default. Use the C<--data> option to display it anyway, and the C<--data-format> option to choose the format to display it in. The available formats are C<pretty-json>, C<json>, C<yaml>, and C<dumper>.
 
     $ log-defer-viz --data  ## show data section. default is pretty-json
     $ log-defer-viz --data-format=json  ## compact, not pretty
@@ -506,7 +506,7 @@ The count parameter provides a method to count the number of times a specific ke
 
 =head1 GREPING
 
-As shown above, there is a C<--grep> command-line option. This lets you filter log messages using arbitrary perl code. If the expression returns true, the log message is processed and displayed as normal.
+As shown above, there is a C<--grep> command-line option. This lets you filter log messages using arbitrary perl code. If the expression returns true, the log message is processed and displayed as usual.
 
 Being able to do this easily is an important advantage of structured logs. With unstructured logs it is often difficult to extract all of the information related to a request and nothing else.
 
@@ -518,7 +518,7 @@ Depending on your underlying storage format, it may be meaningful to grep B<befo
 
     $ grep 10.9.1.2 app.log | log-defer-viz
 
-The final and most error-prone way to grep Log::Defer logs is to grep the unstructured output of C<log-defer-viz>:
+The final and most error-prone way to grep Log::Defer logs is to grep the unstructured output of C<log-defer-viz> (not recommended):
 
     $ log-defer-viz app.log | grep 10.9.1.2
 
@@ -526,7 +526,7 @@ The final and most error-prone way to grep Log::Defer logs is to grep the unstru
 
 =head1 MAPPING
 
-Similar to C<--grep>, there is also a C<--map> command-line option. If this option is passed in, the only thing that is output is whatever your C<--map> expression returns.
+Similar to C<--grep>, there is also a C<--map> command-line option. If this option is passed in, the only output is whatever your C<--map> expression returns.
 
 For example, if you are putting the PID into the data section with C<< $log->data->{pid} = $$ >>, then you can extract the PID like so:
 

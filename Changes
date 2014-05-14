@@ -1,3 +1,12 @@
+0.325   2014-05-13
+  * Delete preceding junk on lines before the first "{"
+    character: This is because grep -r prepends filenames
+    by default and sending this output to log-defer-viz
+    should just work without having to remember to add
+    the -h flag to grep.
+  * Add cpanm installation one-liner to docs
+  * --sort-time feature that sorts entries by start time
+
 0.321   2014-03-26
   * Remove file accidentally checked in to git
 

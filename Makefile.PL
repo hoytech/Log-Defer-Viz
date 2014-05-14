@@ -22,7 +22,7 @@ my %args = (
     DEFINE            => '',
     LICENSE => 'perl',
     dist => {
-      PREOP => 'pod2text bin/log-defer-viz.orig > $(DISTVNAME)/README',
+      PREOP => 'pod2text bin/log-defer-viz > $(DISTVNAME)/README',
     },
 );
 

@@ -176,6 +176,7 @@ while (my $file = shift) {
     my $entry;
 
     try {
+      $_ =~ s/^[^{]+//; ## grep -r prepends filename (this is so you don't to remember the the -h flag)
       $entry = decode_json($_);
     } catch {
       if ($opt->{verbose}) {

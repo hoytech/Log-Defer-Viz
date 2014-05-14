@@ -10,6 +10,12 @@ L<Log::Defer> is a module that creates structured logs. The L<Log::Defer> docume
 
 This module installs a command-line script that parses structured logs created by L<Log::Defer> and displays them in a readable manner.
 
+=head1 INSTALLATION
+
+The fastest way to install C<log-defer-viz> is with cpanminus:
+
+    curl -sL https://raw.github.com/miyagawa/cpanminus/master/cpanm | sudo perl - Log::Defer::Viz
+
 =head1 INPUT METHODS
 
     $ cat file.log | log-defer-viz

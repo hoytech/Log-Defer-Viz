@@ -510,7 +510,7 @@ Note: The only input format currently implemented is newline-separated JSON.
     $ log-defer-viz --nowarn  ## muffle warn logs (so show error and info)
     $ log-defer-viz --nologs  ## don't show log section
     $ log-defer-viz --nocolour  ## turn off terminal colours
-    $ log-defer-viz --preserve-newlines # dont indent log messages to align with log-defer-viz output
+    $ log-defer-viz --preserve-newlines # don't indent multi-line log messages
 
 =head1 TIMERS
 

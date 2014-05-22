@@ -347,7 +347,7 @@ sub handle_entry {
   }
 
   if ($opt->{timers}) {
-    print Log::Defer::Viz::render_timers(width => $columns-10, timers => $entry->{timers}) if $entry->{timers};
+    print Log::Defer::Viz::render_timers(width => $columns-10, timers => $entry->{timers}) if @{ $entry->{timers} };
   }
 
   if ($entry->{data}) {

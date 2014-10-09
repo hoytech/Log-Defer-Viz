@@ -125,12 +125,6 @@ if ($opt->{'data-only'}) {
 }
 
 
-my $count = {};
-
-foreach my $key (@{ $opt->{count} }) {
-  $count->{$key} = {};
-}
-
 
 my $columns = $opt->{'timer-columns'};
 
@@ -138,7 +132,8 @@ my ($term_cols, $term_rows) = Term::Size::chars(*STDOUT{IO});
 $columns = $term_cols if $term_cols;
 
 
-## The _ sub is a shortcut for use in --grep and --map expressions, ie --grep "_->{data}"
+
+## The _ sub is a shortcut for use in --grep, --map, and --count expressions, ie --grep "_->{data}"
 sub _ () { $_ }
 
 if ($opt->{grep}) {
@@ -150,6 +145,24 @@ if ($opt->{map}) {
   $opt->{map} = eval('sub { local $_ = $_[0]; ' . $opt->{map} . '}');
   die "Error compiling --map expression: $@" if $@;
 }
+
+
+my $count = {};
+my $count_subs = {};
+
+foreach my $key (@{ $opt->{count} }) {
+  if ($key =~ /^\w+$/) {
+    ## The original format for count arguments were keys to the data hash
+    $count_subs->{$key} = sub { $_[0]->{data}->{$key} };
+  } else {
+    ## But the more general way is with an accessor
+    $count_subs->{$key} = eval('sub { local $_ = $_[0]; ' . $key . '}');
+    die "Error compiling --count expression '$key' ($@)" if $@;
+  }
+
+  $count->{$key} = {};
+}
+
 
 
 unshift(@ARGV, '-') unless @ARGV;
@@ -266,8 +279,10 @@ sub handle_entry {
 
   if (@{ $opt->{count} }) {
     foreach my $key (@{ $opt->{count} }) {
-      if (exists $entry->{data}->{$key}) {
-        $count->{$key}->{$entry->{data}->{$key}} += 1;
+      my $val = $count_subs->{$key}->($entry);
+
+      if (defined $val) {
+        $count->{$key}->{$val} += 1;
       }
     }
 

@@ -63,6 +63,7 @@ my @opt_spec = (
   'help|h|?',
   'grep|filter|g=s',
   'map|m=s',
+  'reduce|r=s',
   'follow|f',
   'preserve-newlines|pn',
   'sort-time',
@@ -148,6 +149,14 @@ if ($opt->{map}) {
   die "Error compiling --map expression '$expr' ($@)" if $@;
 }
 
+$Log::Defer::Viz::Reduce::o = {};
+
+if ($opt->{reduce}) {
+  my $expr = $opt->{reduce};
+  $opt->{reduce} = eval('package Log::Defer::Viz::Reduce; our $o; sub { local $_ = $_[0]; ' . "$expr\n" . '}');
+  die "Error compiling --reduce expression '$expr' ($@)" if $@;
+}
+
 
 my $count = {};
 my $count_subs = {};
@@ -164,6 +173,8 @@ foreach my $key (@{ $opt->{count} }) {
 
   $count->{$key} = {};
 }
+
+
 
 
 
@@ -222,6 +233,10 @@ if (scalar @{$opt->{count}}) {
   print output_data($count);
 }
 
+if ($opt->{reduce}) {
+  print output_data($Log::Defer::Viz::Reduce::o);
+}
+
 
 
 sub handle_all_entries_from_fh {
@@ -275,6 +290,19 @@ sub handle_entry {
 
     $output = "$output\n" unless $output =~ /\n$/;;
     print $output;
+
+    return;
+  }
+
+  if ($opt->{reduce}) {
+    eval {
+      $opt->{reduce}->($entry);
+    };
+
+    if ($@) {
+      print STDERR "Run-time error in --reduce expression, skipping record: $@";
+      return;
+    }
 
     return;
   }
@@ -549,17 +577,18 @@ Applications can optionally log information in a "data" hash. This information i
     $ log-defer-viz --data-format=dumper  ## Data::Dumper
     $ log-defer-viz --data-only  ## only show data
 
-=head1 FILTERS AND TRANSFORMS
+=head1 FILTERS, TRANSFORMS, AGGREGATES
 
-As described in detail in their respective sections below, C<--grep> and C<--map> allow flexible selection and manipulation of your log data using arbitrary perl code.
+As described in detail in their respective sections below, C<--grep>, C<--map>, and C<--reduce> allow flexible selection and manipulation of your log data using arbitrary perl code.
 
     $ log-defer-viz --grep '$_->{data}'  ## grep for records that have a data section.
                                          ## $_ is the entire Log::Defer entry.
     $ log-defer-viz --map '$_->{data}->{username}'  ## Extract username from data
+    $ log-defer-viz --reduce '$o->{ $_->{data}->{ip_addr} }++'  ## Count all IPs logged
 
 =head1 COUNT
 
-The count parameter tallies the number of times values appear in the data section of the log file. The arguments can be keys in the data section or arbitrary perl code.
+The count parameter tallies the number of times values appear in the data section of the log file. The arguments can be keys in the data section or arbitrary perl code. Multiple values are accepted. Note: Although mostly obsoleted by the C<--reduce> feature, C<--count> is kept for backwards compatibility and because it can be quite convenient.
 
     $ log-defer-viz --data --count ip_address ## Display how many log lines for each ip address
     $ log-defer-viz --data --count ip_address --count '$_->{data}->{login_info}->{username}'
@@ -626,6 +655,27 @@ For example, here is how to do a "pass-through grep" where the output is another
                     > jimmys-requests.log
 
 Note that the above also demonstrates two shortcut features: First, the C<-g> and C<-m> switches are abbreviations for C<--grep> and C<--map> respectively. Second, in grep and map expressions the C<_> function is an abbreviation for C<$_>. Although this is one character shorter, the main reason this exists is so that you can use double-quoted strings without having to worry about escaping C<$> characters from your shell.
+
+
+
+=head1 REDUCING
+
+Unlike C<--map> which outputs the same number of values that were input, and C<--grep> that can return any number up to that amount, C<--reduce> returns exactly one value.
+
+While the expression passed in as an argument to C<--reduce> is being evaluated, there is a special variable called C<$o> defined. The initial value of this variable is an empty hash (C<{}>) and the value stored there is preserved across all invocations of your reduce expression so it can be used for counters and accumulators and such.
+
+The most straightforward use-case is the simple tally. For example, here is how you could mimic the (somewhat deprecated) C<--count> feature which tallies up occurences of values in the data section:
+
+    $ log-defer-viz --reduce '$o->{ $_->{data}->{status_code} }++' \
+                    service.log
+    {
+        "200": 10293,
+        "404": 392,
+        "304": 3012,
+        "500": 2
+    }
+
+As with C<--data> and C<--count>, the default output format is prettified JSON but you can change that with the C<--data-format> option.
 
 
 

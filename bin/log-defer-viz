@@ -137,13 +137,15 @@ $columns = $term_cols if $term_cols;
 sub _ () { $_ }
 
 if ($opt->{grep}) {
-  $opt->{grep} = eval('sub { local $_ = $_[0]; ' . $opt->{grep} . '}');
-  die "Error compiling --grep expression: $@" if $@;
+  my $expr = $opt->{grep};
+  $opt->{grep} = eval('sub { local $_ = $_[0]; ' . $expr . '}');
+  die "Error compiling --grep expression '$expr' ($@)" if $@;
 }
 
 if ($opt->{map}) {
-  $opt->{map} = eval('sub { local $_ = $_[0]; ' . $opt->{map} . '}');
-  die "Error compiling --map expression: $@" if $@;
+  my $expr = $opt->{map};
+  $opt->{map} = eval('sub { local $_ = $_[0]; ' . $expr . '}');
+  die "Error compiling --map expression '$expr' ($@)" if $@;
 }
 
 

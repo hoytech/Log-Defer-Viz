@@ -1,3 +1,17 @@
+0.330   2014-10-08
+  * Do the right thing in case a sloppy encoder creates an empty
+    array of timers (like the first draft of the C++ encoder did).
+  * Prevent -f from dumping the whole file before following
+    (thanks Avianna)
+  * Stop --count from prepending a bunch of junk to the output JSON
+    which makes it easier to consume from a script (thanks Avianna)
+  * Allow --count to accept expressions, just like --grep and --map.
+    One of the reasons this is useful is you can fetch arbitratily
+    nested items from the data section (thanks Avianna)
+  * In the event of a --map or --grep expression failing to compile,
+    include the faulty expression in the error message
+  * Minor doc updates
+
 0.325   2014-05-13
   * Delete preceding junk on lines before the first "{"
     character: This is because grep -r prepends filenames

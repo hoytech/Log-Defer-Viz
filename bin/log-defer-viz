@@ -138,13 +138,13 @@ sub _ () { $_ }
 
 if ($opt->{grep}) {
   my $expr = $opt->{grep};
-  $opt->{grep} = eval('sub { local $_ = $_[0]; ' . $expr . '}');
+  $opt->{grep} = eval('sub { local $_ = $_[0]; ' . "$expr\n" . '}');
   die "Error compiling --grep expression '$expr' ($@)" if $@;
 }
 
 if ($opt->{map}) {
   my $expr = $opt->{map};
-  $opt->{map} = eval('sub { local $_ = $_[0]; ' . $expr . '}');
+  $opt->{map} = eval('sub { local $_ = $_[0]; ' . "$expr\n" . '}');
   die "Error compiling --map expression '$expr' ($@)" if $@;
 }
 
@@ -158,7 +158,7 @@ foreach my $key (@{ $opt->{count} }) {
     $count_subs->{$key} = sub { $_[0]->{data}->{$key} };
   } else {
     ## But the more general way is with an accessor
-    $count_subs->{$key} = eval('sub { local $_ = $_[0]; ' . $key . '}');
+    $count_subs->{$key} = eval('sub { local $_ = $_[0]; ' . "$key\n" . '}');
     die "Error compiling --count expression '$key' ($@)" if $@;
   }
 

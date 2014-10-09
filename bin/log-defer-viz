@@ -628,6 +628,7 @@ The final and most error-prone way to grep Log::Defer logs is to grep the unstru
 
     $ log-defer-viz app.log | grep 10.9.1.2
 
+In general, C<--grep> can be combined with other switches that take expressions such as C<--map> and C<--reduce>. In these cases, the greping will occur first.
 
 
 =head1 MAPPING
@@ -673,9 +674,9 @@ Note that the above also demonstrates two shortcut features: First, the C<-g> an
 
 Unlike C<--map> which outputs the same number of values that were input, and C<--grep> that can return any number up to that amount, C<--reduce> returns exactly one value.
 
-While the expression passed in as an argument to C<--reduce> is being evaluated, there is a special variable called C<$o> defined. The initial value of this variable is an empty hash (C<{}>) and the value stored there is preserved across all invocations of your reduce expression so it can be used for counters and accumulators and such.
+While the expression passed in as an argument to C<--reduce> is being evaluated, there is a special variable called C<$o> available. The initial value of this variable is an empty hash (C<{}>) and the value stored there is preserved across all invocations of your reduce expression. This means it can be used for counters and accumulators and such.
 
-The most straightforward use-case is the simple tally. For example, here is how you could mimic the (somewhat deprecated) C<--count> feature which tallies up occurences of values in the data section:
+The most straightforward use-case is the simple tally or count. For example, here is how you could mimic the (somewhat deprecated) C<--count> feature and get the sum totals of the different HTTP status codes present in the log file:
 
     $ log-defer-viz --reduce '$o->{ $_->{data}->{status_code} }++' \
                     service.log
@@ -685,6 +686,10 @@ The most straightforward use-case is the simple tally. For example, here is how 
         "304": 3012,
         "500": 2
     }
+
+Here is how to count how many log entries contain at least one error message (log level 10 or lower, see L<Log::Defer>):
+
+    --reduce '$o->{errors}++ if grep { $_->[1] <= 10 } @{ $_->{logs} }'
 
 As with C<--data> and C<--count>, the default output format is prettified JSON but you can change that with the C<--data-format> option.
 

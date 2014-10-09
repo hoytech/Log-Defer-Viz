@@ -1,6 +1,6 @@
 package Log::Defer::Viz;
 
-our $VERSION = '0.330';
+our $VERSION = '0.340';
 
 use common::sense;
 

@@ -1,3 +1,11 @@
+0.340   2014-10-09
+  * New --reduce feature: The final piece: Now ldv is officially
+    a higher order functional programming language. :)
+    This mostly obsoletes --count but obviously that's still there
+    for back-compat and occasional usefulness.
+  * Properly report run-time errors in --count expressions.
+  * Support # comments in grep/map/etc expressions
+
 0.330   2014-10-08
   * Do the right thing in case a sloppy encoder creates an empty
     array of timers (like the first draft of the C++ encoder did).

@@ -549,19 +549,24 @@ Applications can optionally log information in a "data" hash. This information i
     $ log-defer-viz --data-format=dumper  ## Data::Dumper
     $ log-defer-viz --data-only  ## only show data
 
+=head1 FILTERS AND TRANSFORMS
+
+As described in detail in their respective sections below, C<--grep> and C<--map> allow flexible selection and manipulation of your log data using arbitrary perl code.
+
+    $ log-defer-viz --grep '$_->{data}'  ## grep for records that have a data section.
+                                         ## $_ is the entire Log::Defer entry.
+    $ log-defer-viz --map '$_->{data}->{username}'  ## Extract username from data
+
 =head1 COUNT
 
-The count parameter provides a method to count the number of times a specific key/value appears in the data section of the log file.
+The count parameter tallies the number of times values appear in the data section of the log file. The arguments can be keys in the data section or arbitrary perl code.
 
     $ log-defer-viz --data --count ip_address ## Display how many log lines for each ip address
-    $ log-defer-viz --data --count ip_address --count user_id ## Display how many log lines for each ip address and each user_id
+    $ log-defer-viz --data --count ip_address --count '$_->{data}->{login_info}->{username}'
 
 =head1 MISC
 
     $ log-defer-viz --help  ## the text you're reading now
-    $ log-defer-viz --grep '$_->{data}'  ## grep for records that have a data section.
-                                         ## $_ is the entire Log::Defer entry.
-    $ log-defer-viz --map '$_->{data}->{username}'  ## Extract username from data
     $ log-defer-viz --sort-time  ## Sort by start time
 
 

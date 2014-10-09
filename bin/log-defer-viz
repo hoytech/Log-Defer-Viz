@@ -204,7 +204,6 @@ if ($opt->{'sort-time'}) {
 
 
 if (scalar @{$opt->{count}}) {
-  print "  Count:\n";
   print output_data($count);
 }
 
@@ -261,6 +260,16 @@ sub handle_entry {
 
     $output = "$output\n" unless $output =~ /\n$/;;
     print $output;
+
+    return;
+  }
+
+  if (@{ $opt->{count} }) {
+    foreach my $key (@{ $opt->{count} }) {
+      if (exists $entry->{data}->{$key}) {
+        $count->{$key}->{$entry->{data}->{$key}} += 1;
+      }
+    }
 
     return;
   }
@@ -357,12 +366,6 @@ sub handle_entry {
     } else {
       print "  ** This log has associated data. See it with --data\n"
         unless $opt->{quiet} || (defined $opt->{data} && !$opt->{data});
-    }
-
-    foreach my $key (@{ $opt->{count} }) {
-      if (exists $entry->{data}->{$key}) {
-        $count->{$key}->{$entry->{data}->{$key}} += 1;
-      }
     }
   }
 

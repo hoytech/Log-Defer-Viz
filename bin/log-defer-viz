@@ -309,7 +309,16 @@ sub handle_entry {
 
   if (@{ $opt->{count} }) {
     foreach my $key (@{ $opt->{count} }) {
-      my $val = $count_subs->{$key}->($entry);
+      my $val;
+
+      eval {
+        $val = $count_subs->{$key}->($entry);
+      };
+
+      if ($@) {
+        print STDERR "Run-time error in --count expression, skipping record: $@";
+        return;
+      }
 
       if (defined $val) {
         $count->{$key}->{$val} += 1;

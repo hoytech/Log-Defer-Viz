@@ -155,10 +155,3 @@ Copyright 2013 Doug Hoyte.
 This module is licensed under the same terms as perl itself.
 
 =cut
-
-
-
-
-TODO:
-
-* option --interleaved that shows events at absolute times

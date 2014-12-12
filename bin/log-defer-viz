@@ -63,6 +63,7 @@ my @opt_spec = (
   'help|h|?',
   'grep|filter|g=s',
   'map|m=s',
+  'pass-through|pt',
   'reduce|r=s',
   'follow|f',
   'preserve-newlines|pn',
@@ -157,6 +158,9 @@ if ($opt->{reduce}) {
   die "Error compiling --reduce expression '$expr' ($@)" if $@;
 }
 
+die "--pass-through and --map are incompatible" if $opt->{'pass-through'} && $opt->{map};
+die "--pass-through and --reduce are incompatible" if $opt->{'pass-through'} && $opt->{reduce};
+
 
 my $count = {};
 my $count_subs = {};
@@ -246,7 +250,7 @@ sub handle_all_entries_from_fh {
     my $entry;
 
     try {
-      $_ =~ s/^[^{]+//; ## grep -r prepends filename (this is so you don't to remember the the -h flag) }
+      $_ =~ s/^[^{]+//; ## } grep -r prepends filename, this regexp is so you don't have to remember the -h flag to grep.
       $entry = decode_json($_);
     } catch {
       if ($opt->{verbose}) {
@@ -254,12 +258,12 @@ sub handle_all_entries_from_fh {
       }
     };
 
-    handle_entry($entry) if defined $entry;
+    handle_entry($entry, \$_) if defined $entry;
   }
 }
 
 sub handle_entry {
-  my ($entry) = @_;
+  my ($entry, $line_ref) = @_;
 
   if ($opt->{grep}) {
     my $result;
@@ -274,6 +278,12 @@ sub handle_entry {
     }
 
     return unless $result;
+  }
+
+  if ($opt->{'pass-through'}) {
+    print $$line_ref;
+
+    return;
   }
 
   if ($opt->{map}) {
@@ -598,6 +608,7 @@ As described in detail in their respective sections below, C<--grep>, C<--map>, 
                                          ## $_ is the entire Log::Defer entry.
     $ log-defer-viz --map '$_->{data}->{username}'  ## Extract username from data
     $ log-defer-viz --reduce '$o->{ $_->{data}->{ip_addr} }++'  ## Count IP addresses
+    $ log-defer-viz --pass-through  ## After grepping, print a valid log-defer stream
 
 =head2 COUNT
 
@@ -669,6 +680,8 @@ For example, here is how to do a "pass-through grep" where the output is another
                     > jimmys-requests.log
 
 Note that the above also demonstrates two shortcut features: First, the C<-g> and C<-m> switches are abbreviations for C<--grep> and C<--map> respectively. Second, in grep and map expressions the C<_> function is an abbreviation for C<$_>. Although this is one character shorter, the main reason this exists is so that you can use double-quoted strings without having to worry about escaping C<$> characters from your shell.
+
+Instead of using C<-m "encode_json $_">, there is a C<--pass-through> option that is more efficient since it doesn't pointlessly re-encode the log message.
 
 
 

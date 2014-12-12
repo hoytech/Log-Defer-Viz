@@ -1,3 +1,11 @@
+0.345   2014-12-11
+  * --pass-through feature: This switch enables a mode where the output
+    is log-defer JSON format, suitable for feeding into another invocation
+    of log-defer-viz or a file to be stored later. It is more efficient
+    than -m 'encode_json $_' because it doesn't re-encode the message.
+  * Fix regression that broke display of log messages created with ancient
+    Log::Defer versions back when timers were stored in a hash ref
+
 0.340   2014-10-09
   * New --reduce feature: The final piece: Now ldv is officially
     a higher order functional programming language. :)

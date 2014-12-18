@@ -1,3 +1,8 @@
+0.346   2014-12-18
+  * --sort-time wouldn't work if Log::Defer input wasn't completely
+    minified. This bug was a result of a performance optimisation where
+    we avoid deserializing the JSON (thanks John Piasetzki)
+
 0.345   2014-12-11
   * --pass-through feature: This switch enables a mode where the output
     is log-defer JSON format, suitable for feeding into another invocation

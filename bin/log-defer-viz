@@ -215,7 +215,7 @@ while (my $file = shift) {
 
   if ($opt->{'sort-time'}) {
     while (<$fh>) {
-      if (/"start":([\d.]+)/) {
+      if (/"start":\s*([\d.]+)/) {
         print $sort_in_fh "$1$_";
       }
     }

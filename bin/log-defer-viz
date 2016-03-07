@@ -66,6 +66,7 @@ my @opt_spec = (
   'pass-through|pt',
   'reduce|r=s',
   'follow|f',
+  'follow-reopen|F',
   'preserve-newlines|pn',
   'sort-time',
 );
@@ -88,6 +89,7 @@ my $opt = {
     'data-only' => 0,
 
     'follow' => 0,
+    'follow-reopen' => 0,
     'preserve-newlines' => 0,
     'sort-time' => 0,
 };
@@ -184,8 +186,12 @@ foreach my $key (@{ $opt->{count} }) {
 
 
 unshift(@ARGV, '-') unless @ARGV;
-if (@ARGV > 1 && $opt->{follow}) {
-  die "You've specified --follow but have also provided multiple files, which doesn't make sense. Did you mean to do this?";
+if (@ARGV > 1 && ($opt->{follow} || $opt->{'follow-reopen'})) {
+  die "You've specified --follow or --follow-reopen but have also provided multiple files, which doesn't make sense. Did you mean to do this?";
+}
+
+if ($opt->{follow} && $opt->{'follow-reopen'}) {
+  die "-f and -F are mutually exclusive";
 }
 
 
@@ -208,8 +214,10 @@ while (my $file = shift) {
   } else {
     if ($opt->{follow}) {
       open($fh, '-|', qw/tail -f -n 0/, $file) || die "couldn't open $file with tail -f: $!";
-    }
-    else {
+    } elsif ($opt->{'follow-reopen'}) {
+      ## May not be fully portable
+      open($fh, '-|', qw/tail -F -n 0/, $file) || die "couldn't open $file with tail -F: $!";
+    } else {
       open($fh, '<', $file) || die "couldn't open $file: $!";
     }
   }
@@ -559,7 +567,7 @@ The fastest way to install C<log-defer-viz> is with cpanminus:
     $ cat file.log | log-defer-viz
     $ log-defer-viz < file.log
     $ log-defer-viz file.log
-    $ log-defer-viz -f file.log # continuously tail file
+    $ log-defer-viz -F file.log # continuously tail file
     $ log-defer-viz file.log file2.log
     $ log-defer-viz archived.log.gz more_logs.bz2
 

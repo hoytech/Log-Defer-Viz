@@ -1,3 +1,8 @@
+0.347   2016-03-07
+  * --help now exits at the right time (thanks Matt Phillips)
+  * There is now a "-F" flag which runs "tail -F" instead of "tail -f"
+    so you can follow log files even if they roll over.
+
 0.346   2014-12-18
   * --sort-time wouldn't work if Log::Defer input wasn't completely
     minified. This bug was a result of a performance optimisation where

@@ -1,6 +1,6 @@
 package Log::Defer::Viz;
 
-our $VERSION = '0.346';
+our $VERSION = '0.347';
 
 use common::sense;
 
@@ -150,7 +150,7 @@ Doug Hoyte, C<< <doug@hcsw.org> >>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2013 Doug Hoyte.
+Copyright 2013-2016 Doug Hoyte.
 
 This module is licensed under the same terms as perl itself.
 

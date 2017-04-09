@@ -24,6 +24,7 @@ my %args = (
     dist => {
       PREOP => 'pod2text bin/log-defer-viz > $(DISTVNAME)/README',
     },
+    clean => { FILES => 'Log-Defer-Viz-*' },
 );
 
 
